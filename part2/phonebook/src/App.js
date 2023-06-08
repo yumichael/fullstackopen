@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { getAll, create, delete_, update } from "./services/persons";
 
 const Filter = ({ filter, setFilter }) => {
   const handleChange = (event) => {
@@ -26,16 +26,36 @@ const AddNew = ({ persons, setPersons }) => {
 
   const addPerson = (event) => {
     event.preventDefault();
-    if (persons.map((person) => person.name).includes(newName)) {
-      alert(`${newName} is already added to phonebook`);
-      return;
+    const existingPerson = persons.find((person) => person.name === newName);
+    if (existingPerson) {
+      if (
+        window.confirm(
+          `${newName} is already added to phonebook, replace the old number with a new one?`
+        )
+      ) {
+        const person = {
+          ...existingPerson,
+          number: newNumber,
+        };
+        update(person.id, person).then((updatedPerson) => {
+          setPersons(
+            persons.map((p) => (p.id === updatedPerson.id ? updatedPerson : p))
+          );
+          setNewName("");
+          setNewNumber("");
+        });
+      }
+    } else {
+      const person = {
+        name: newName,
+        number: newNumber,
+      };
+      create(person).then((newPerson) => {
+        setPersons(persons.concat(newPerson));
+        setNewName("");
+        setNewNumber("");
+      });
     }
-    const person = {
-      name: newName,
-      number: newNumber,
-    };
-    setPersons(persons.concat(person));
-    setNewName("");
   };
 
   return (
@@ -55,22 +75,36 @@ const AddNew = ({ persons, setPersons }) => {
   );
 };
 
-const Person = ({ person }) => {
+const Delete = ({ person, persons, setPersons }) => {
+  const { id } = person;
+  const handleClick = () => {
+    if (window.confirm(`Delete ${person.name}?`)) {
+      delete_(id).then(() => {
+        setPersons(persons.filter((person) => person.id !== id));
+      });
+    }
+  };
+
+  return <button onClick={handleClick}>delete</button>;
+};
+
+const Person = ({ person, persons, setPersons }) => {
   return (
     <>
-      {person.name} {person.number}
+      {person.name} {person.number}{" "}
+      <Delete person={person} persons={persons} setPersons={setPersons} />
     </>
   );
 };
 
-const Persons = ({ persons, filter }) => {
+const Persons = ({ persons, filter, setPersons }) => {
   return persons
     .filter((person) =>
       person.name.toLowerCase().startsWith(filter.toLowerCase())
     )
     .map((person) => (
-      <div key={person.name}>
-        <Person person={person} />
+      <div key={person.id}>
+        <Person person={person} persons={persons} setPersons={setPersons} />
       </div>
     ));
 };
@@ -80,8 +114,8 @@ const App = () => {
   const [filter, setFilter] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:3001/db").then((response) => {
-      setPersons(response.data.persons);
+    getAll().then((persons) => {
+      setPersons(persons);
     });
   }, []);
 
@@ -92,7 +126,7 @@ const App = () => {
       <h2>add a new</h2>
       <AddNew persons={persons} setPersons={setPersons} />
       <h2>Numbers</h2>
-      <Persons persons={persons} filter={filter} />
+      <Persons persons={persons} filter={filter} setPersons={setPersons} />
     </div>
   );
 };
