@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { getAll, create, delete_, update } from "./services/persons";
 
+const Notification = ({ notification }) => {
+  return (
+    notification && (
+      <div className={notification.type}>{notification.message}</div>
+    )
+  );
+};
+
 const Filter = ({ filter, setFilter }) => {
   const handleChange = (event) => {
     setFilter(event.target.value);
@@ -13,7 +21,7 @@ const Filter = ({ filter, setFilter }) => {
   );
 };
 
-const AddNew = ({ persons, setPersons }) => {
+const AddNew = ({ persons, setPersons, setNotification }) => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
 
@@ -37,13 +45,32 @@ const AddNew = ({ persons, setPersons }) => {
           ...existingPerson,
           number: newNumber,
         };
-        update(person.id, person).then((updatedPerson) => {
-          setPersons(
-            persons.map((p) => (p.id === updatedPerson.id ? updatedPerson : p))
-          );
-          setNewName("");
-          setNewNumber("");
-        });
+        update(person.id, person)
+          .then((updatedPerson) => {
+            setPersons(
+              persons.map((p) =>
+                p.id === updatedPerson.id ? updatedPerson : p
+              )
+            );
+            setNewName("");
+            setNewNumber("");
+            setNotification({
+              type: "info",
+              message: `Changed ${updatedPerson.name}'s phone number`,
+            });
+            setTimeout(() => {
+              setNotification(null);
+            }, 5000);
+          })
+          .catch((error) => {
+            setNotification({
+              type: "error",
+              message: `Information of ${person.name} has already been removed from server`,
+            });
+            setTimeout(() => {
+              setNotification(null);
+            }, 5000);
+          });
       }
     } else {
       const person = {
@@ -54,6 +81,13 @@ const AddNew = ({ persons, setPersons }) => {
         setPersons(persons.concat(newPerson));
         setNewName("");
         setNewNumber("");
+        setNotification({
+          type: "info",
+          message: `Added ${newPerson.name}`,
+        });
+        setTimeout(() => {
+          setNotification(null);
+        }, 5000);
       });
     }
   };
@@ -112,6 +146,7 @@ const Persons = ({ persons, filter, setPersons }) => {
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [filter, setFilter] = useState("");
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     getAll().then((persons) => {
@@ -122,9 +157,14 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification notification={notification} />
       <Filter filter={filter} setFilter={setFilter} />
       <h2>add a new</h2>
-      <AddNew persons={persons} setPersons={setPersons} />
+      <AddNew
+        persons={persons}
+        setPersons={setPersons}
+        setNotification={setNotification}
+      />
       <h2>Numbers</h2>
       <Persons persons={persons} filter={filter} setPersons={setPersons} />
     </div>
