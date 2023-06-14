@@ -109,12 +109,19 @@ const AddNew = ({ persons, setPersons, setNotification }) => {
   );
 };
 
-const Delete = ({ person, persons, setPersons }) => {
+const Delete = ({ person, persons, setPersons, setNotification }) => {
   const { id } = person;
   const handleClick = () => {
     if (window.confirm(`Delete ${person.name}?`)) {
       delete_(id).then(() => {
         setPersons(persons.filter((person) => person.id !== id));
+        setNotification({
+          type: "info",
+          message: `Deleted ${person.name}`,
+        });
+        setTimeout(() => {
+          setNotification(null);
+        }, 5000);
       });
     }
   };
@@ -122,23 +129,33 @@ const Delete = ({ person, persons, setPersons }) => {
   return <button onClick={handleClick}>delete</button>;
 };
 
-const Person = ({ person, persons, setPersons }) => {
+const Person = ({ person, persons, setPersons, setNotification }) => {
   return (
     <>
       {person.name} {person.number}{" "}
-      <Delete person={person} persons={persons} setPersons={setPersons} />
+      <Delete
+        person={person}
+        persons={persons}
+        setPersons={setPersons}
+        setNotification={setNotification}
+      />
     </>
   );
 };
 
-const Persons = ({ persons, filter, setPersons }) => {
+const Persons = ({ persons, filter, setPersons, setNotification }) => {
   return persons
     .filter((person) =>
       person.name.toLowerCase().startsWith(filter.toLowerCase())
     )
     .map((person) => (
       <div key={person.id}>
-        <Person person={person} persons={persons} setPersons={setPersons} />
+        <Person
+          person={person}
+          persons={persons}
+          setPersons={setPersons}
+          setNotification={setNotification}
+        />
       </div>
     ));
 };
@@ -166,7 +183,12 @@ const App = () => {
         setNotification={setNotification}
       />
       <h2>Numbers</h2>
-      <Persons persons={persons} filter={filter} setPersons={setPersons} />
+      <Persons
+        persons={persons}
+        filter={filter}
+        setPersons={setPersons}
+        setNotification={setNotification}
+      />
     </div>
   );
 };
