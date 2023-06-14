@@ -63,6 +63,7 @@ const AddNew = ({ persons, setPersons, setNotification }) => {
             }, 5000);
           })
           .catch((error) => {
+            setPersons(persons.filter((p) => p.id !== person.id));
             setNotification({
               type: "error",
               message: `Information of ${person.name} has already been removed from server`,
