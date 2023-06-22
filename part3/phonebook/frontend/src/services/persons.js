@@ -1,22 +1,15 @@
-import axios from "axios";
-const baseUrl = "/api/persons";
+import axios from 'axios';
 
-const getAll = () => {
-  return axios.get(baseUrl).then((response) => response.data);
-};
+const baseUrl = '/api/persons';
 
-const create = (newObject) => {
-  return axios.post(baseUrl, newObject).then((response) => response.data);
-};
+const getAll = () => axios.get(baseUrl).then((response) => response.data);
 
-const update = (id, newObject) => {
-  return axios
-    .put(`${baseUrl}/${id}`, newObject)
-    .then((response) => response.data);
-};
+const create = (newObject) =>
+  axios.post(baseUrl, newObject).then((response) => response.data);
 
-const delete_ = (id) => {
-  return axios.delete(`${baseUrl}/${id}`);
-};
+const update = (id, newObject) =>
+  axios.put(`${baseUrl}/${id}`, newObject).then((response) => response.data);
+
+const delete_ = (id) => axios.delete(`${baseUrl}/${id}`);
 
 export { getAll, create, update, delete_ };

@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
-import { getAll, create, delete_, update } from "./services/persons";
+import { useState, useEffect } from 'react';
+import { getAll, create, delete_, update } from './services/persons';
 
-const Notification = ({ notification }) => {
+function Notification({ notification }) {
   return (
     notification && (
       <div className={notification.type}>{notification.message}</div>
     )
   );
-};
+}
 
-const Filter = ({ filter, setFilter }) => {
+function Filter({ filter, setFilter }) {
   const handleChange = (event) => {
     setFilter(event.target.value);
   };
@@ -19,11 +19,11 @@ const Filter = ({ filter, setFilter }) => {
       filter shown with <input value={filter} onChange={handleChange} />
     </div>
   );
-};
+}
 
-const AddNew = ({ persons, setPersons, flashNotification }) => {
-  const [newName, setNewName] = useState("");
-  const [newNumber, setNewNumber] = useState("");
+function AddNew({ persons, setPersons, flashNotification }) {
+  const [newName, setNewName] = useState('');
+  const [newNumber, setNewNumber] = useState('');
 
   const handleNameChange = (event) => {
     setNewName(event.target.value);
@@ -38,7 +38,7 @@ const AddNew = ({ persons, setPersons, flashNotification }) => {
     if (existingPerson) {
       if (
         window.confirm(
-          `${newName} is already added to phonebook, replace the old number with a new one?`
+          `${newName} is already added to phonebook, replace the old number with a new one?`,
         )
       ) {
         const person = {
@@ -49,20 +49,20 @@ const AddNew = ({ persons, setPersons, flashNotification }) => {
           .then((updatedPerson) => {
             setPersons(
               persons.map((p) =>
-                p.id === updatedPerson.id ? updatedPerson : p
-              )
+                p.id === updatedPerson.id ? updatedPerson : p,
+              ),
             );
-            setNewName("");
-            setNewNumber("");
+            setNewName('');
+            setNewNumber('');
             flashNotification({
-              type: "info",
+              type: 'info',
               message: `Changed ${updatedPerson.name}'s phone number`,
             });
           })
           .catch((error) => {
             setPersons(persons.filter((p) => p.id !== person.id));
             flashNotification({
-              type: "error",
+              type: 'error',
               message: `Information of ${person.name} has already been removed from server`,
             });
           });
@@ -75,16 +75,16 @@ const AddNew = ({ persons, setPersons, flashNotification }) => {
       create(person)
         .then((newPerson) => {
           setPersons(persons.concat(newPerson));
-          setNewName("");
-          setNewNumber("");
+          setNewName('');
+          setNewNumber('');
           flashNotification({
-            type: "info",
+            type: 'info',
             message: `Added ${newPerson.name}`,
           });
         })
         .catch((error) => {
           flashNotification({
-            type: "error",
+            type: 'error',
             message: error.response.data.error,
           });
         });
@@ -100,35 +100,39 @@ const AddNew = ({ persons, setPersons, flashNotification }) => {
         number: <input value={newNumber} onChange={handleNumberChange} />
       </div>
       <div>
-        <button type="submit" onClick={addPerson}>
+        <button type='submit' onClick={addPerson}>
           add
         </button>
       </div>
     </form>
   );
-};
+}
 
-const Delete = ({ person, persons, setPersons, flashNotification }) => {
+function Delete({ person, persons, setPersons, flashNotification }) {
   const { id } = person;
   const handleClick = () => {
     if (window.confirm(`Delete ${person.name}?`)) {
       delete_(id).then(() => {
         setPersons(persons.filter((person) => person.id !== id));
         flashNotification({
-          type: "info",
+          type: 'info',
           message: `Deleted ${person.name}`,
         });
       });
     }
   };
 
-  return <button onClick={handleClick}>delete</button>;
-};
+  return (
+    <button type='button' onClick={handleClick}>
+      delete
+    </button>
+  );
+}
 
-const Person = ({ person, persons, setPersons, flashNotification }) => {
+function Person({ person, persons, setPersons, flashNotification }) {
   return (
     <>
-      {person.name} {person.number}{" "}
+      {person.name} {person.number}{' '}
       <Delete
         person={person}
         persons={persons}
@@ -137,12 +141,12 @@ const Person = ({ person, persons, setPersons, flashNotification }) => {
       />
     </>
   );
-};
+}
 
-const Persons = ({ persons, filter, setPersons, flashNotification }) => {
-  return persons
+const Persons = ({ persons, filter, setPersons, flashNotification }) =>
+  persons
     .filter((person) =>
-      person.name.toLowerCase().startsWith(filter.toLowerCase())
+      person.name.toLowerCase().startsWith(filter.toLowerCase()),
     )
     .map((person) => (
       <div key={person.id}>
@@ -154,11 +158,10 @@ const Persons = ({ persons, filter, setPersons, flashNotification }) => {
         />
       </div>
     ));
-};
 
-const App = () => {
+function App() {
   const [persons, setPersons] = useState([]);
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState('');
   const [notification, setNotification] = useState(null);
   const [clearNotification, setClearNotification] = useState(null);
 
@@ -202,6 +205,6 @@ const App = () => {
       />
     </div>
   );
-};
+}
 
 export default App;
