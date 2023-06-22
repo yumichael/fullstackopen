@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAll, create, delete_, update } from './services/persons';
+import { getAll, create, remove, update } from './services/persons';
 
 function Notification({ notification }) {
   return (
@@ -112,8 +112,8 @@ function Delete({ person, persons, setPersons, flashNotification }) {
   const { id } = person;
   const handleClick = () => {
     if (window.confirm(`Delete ${person.name}?`)) {
-      delete_(id).then(() => {
-        setPersons(persons.filter((person) => person.id !== id));
+      remove(id).then(() => {
+        setPersons(persons.filter((p) => p.id !== id));
         flashNotification({
           type: 'info',
           message: `Deleted ${person.name}`,
@@ -166,8 +166,8 @@ function App() {
   const [clearNotification, setClearNotification] = useState(null);
 
   useEffect(() => {
-    getAll().then((persons) => {
-      setPersons(persons);
+    getAll().then((ps) => {
+      setPersons(ps);
     });
   }, []);
 

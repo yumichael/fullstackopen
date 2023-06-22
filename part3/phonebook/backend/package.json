@@ -25,6 +25,7 @@
     "@flydotio/dockerfile": "^0.2.15",
     "eslint": "^8.43.0",
     "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-import": "^2.27.5",
     "nodemon": "^2.0.22"
   }

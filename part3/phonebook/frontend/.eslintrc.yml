@@ -5,6 +5,7 @@ env:
 extends:
   - plugin:react/recommended
   - airbnb
+  - prettier
 overrides: []
 parserOptions:
   ecmaVersion: latest
@@ -15,12 +16,4 @@ rules:
   react/react-in-jsx-scope: off
   react/jsx-filename-extension: off
   no-alert: off
-  object-curly-newline: off
-  no-confusing-arrow: off
-  implicit-arrow-linebreak: off
-  function-paren-newline: off
   no-unused-vars: off
-  react/jsx-one-expression-per-line: off
-  no-shadow: off
-  jsx-quotes: [error, prefer-single]
-  no-underscore-dangle: off
