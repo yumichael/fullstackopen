@@ -21,7 +21,7 @@ const Filter = ({ filter, setFilter }) => {
   );
 };
 
-const AddNew = ({ persons, setPersons, setNotification }) => {
+const AddNew = ({ persons, setPersons, flashNotification }) => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
 
@@ -54,23 +54,17 @@ const AddNew = ({ persons, setPersons, setNotification }) => {
             );
             setNewName("");
             setNewNumber("");
-            setNotification({
+            flashNotification({
               type: "info",
               message: `Changed ${updatedPerson.name}'s phone number`,
             });
-            setTimeout(() => {
-              setNotification(null);
-            }, 5000);
           })
           .catch((error) => {
             setPersons(persons.filter((p) => p.id !== person.id));
-            setNotification({
+            flashNotification({
               type: "error",
               message: `Information of ${person.name} has already been removed from server`,
             });
-            setTimeout(() => {
-              setNotification(null);
-            }, 5000);
           });
       }
     } else {
@@ -78,18 +72,22 @@ const AddNew = ({ persons, setPersons, setNotification }) => {
         name: newName,
         number: newNumber,
       };
-      create(person).then((newPerson) => {
-        setPersons(persons.concat(newPerson));
-        setNewName("");
-        setNewNumber("");
-        setNotification({
-          type: "info",
-          message: `Added ${newPerson.name}`,
+      create(person)
+        .then((newPerson) => {
+          setPersons(persons.concat(newPerson));
+          setNewName("");
+          setNewNumber("");
+          flashNotification({
+            type: "info",
+            message: `Added ${newPerson.name}`,
+          });
+        })
+        .catch((error) => {
+          flashNotification({
+            type: "error",
+            message: error.response.data.error,
+          });
         });
-        setTimeout(() => {
-          setNotification(null);
-        }, 5000);
-      });
     }
   };
 
@@ -110,19 +108,16 @@ const AddNew = ({ persons, setPersons, setNotification }) => {
   );
 };
 
-const Delete = ({ person, persons, setPersons, setNotification }) => {
+const Delete = ({ person, persons, setPersons, flashNotification }) => {
   const { id } = person;
   const handleClick = () => {
     if (window.confirm(`Delete ${person.name}?`)) {
       delete_(id).then(() => {
         setPersons(persons.filter((person) => person.id !== id));
-        setNotification({
+        flashNotification({
           type: "info",
           message: `Deleted ${person.name}`,
         });
-        setTimeout(() => {
-          setNotification(null);
-        }, 5000);
       });
     }
   };
@@ -130,7 +125,7 @@ const Delete = ({ person, persons, setPersons, setNotification }) => {
   return <button onClick={handleClick}>delete</button>;
 };
 
-const Person = ({ person, persons, setPersons, setNotification }) => {
+const Person = ({ person, persons, setPersons, flashNotification }) => {
   return (
     <>
       {person.name} {person.number}{" "}
@@ -138,13 +133,13 @@ const Person = ({ person, persons, setPersons, setNotification }) => {
         person={person}
         persons={persons}
         setPersons={setPersons}
-        setNotification={setNotification}
+        flashNotification={flashNotification}
       />
     </>
   );
 };
 
-const Persons = ({ persons, filter, setPersons, setNotification }) => {
+const Persons = ({ persons, filter, setPersons, flashNotification }) => {
   return persons
     .filter((person) =>
       person.name.toLowerCase().startsWith(filter.toLowerCase())
@@ -155,7 +150,7 @@ const Persons = ({ persons, filter, setPersons, setNotification }) => {
           person={person}
           persons={persons}
           setPersons={setPersons}
-          setNotification={setNotification}
+          flashNotification={flashNotification}
         />
       </div>
     ));
@@ -165,12 +160,27 @@ const App = () => {
   const [persons, setPersons] = useState([]);
   const [filter, setFilter] = useState("");
   const [notification, setNotification] = useState(null);
+  const [clearNotification, setClearNotification] = useState(null);
 
   useEffect(() => {
     getAll().then((persons) => {
       setPersons(persons);
     });
   }, []);
+
+  const flashNotification = ({ type, message }) => {
+    setNotification({
+      type,
+      message,
+    });
+    if (clearNotification !== null) {
+      clearTimeout(clearNotification);
+    }
+    const newClearNotification = setTimeout(() => {
+      setNotification(null);
+    }, 5000);
+    setClearNotification(newClearNotification);
+  };
 
   return (
     <div>
@@ -181,14 +191,14 @@ const App = () => {
       <AddNew
         persons={persons}
         setPersons={setPersons}
-        setNotification={setNotification}
+        flashNotification={flashNotification}
       />
       <h2>Numbers</h2>
       <Persons
         persons={persons}
         filter={filter}
         setPersons={setPersons}
-        setNotification={setNotification}
+        flashNotification={flashNotification}
       />
     </div>
   );
